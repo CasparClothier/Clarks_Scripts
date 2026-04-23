@@ -9,12 +9,12 @@ This tool functions by converting image and text data into vectors.
 
 Besides establishing contact with the tool, in this script I establish ways of testing how the tool interprets visual features such as:
 
--Colours
--Branding
--Material textures
--Softness or sharpness of lines
+- Colours
+- Branding
+- Material textures
+- Softness or sharpness of lines
 ...
 
 After a process of trial and error I naturally found that while this was heavily dependent on the input dataset, brand labels significantly effected the principle components of a dataset. 
 To avoid this and focus more on other design features, I photoshopped logos off the shoes. 
-Sadly, I haven't found any of the visualisations that I produced at the time. When I do, I will be sure to upload them here.
+Sadly, I haven't been able to find any of the visualisations that I produced at the time. When I do, I will be sure to upload them here.
