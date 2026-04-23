@@ -1,0 +1,195 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Aug  6 13:23:46 2024
+
+@author: cclothier
+"""
+
+# install packages first with command: pip install package_name (often written differently, google)
+
+# code to return embeddings for an image file
+import requests
+import pandas as pd
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.pipeline import Pipeline
+from sklearn.cluster import KMeans
+import time
+import json
+
+comp_vis_key = ''
+comp_vis_endpoint = ''
+
+
+#---------------------------------------------------------------------------------------------------------
+
+
+# Function that sends images to CompVis tool. Returns the respective image embedding.
+
+def image_embedding(image_file):
+    version = ''
+    vec_img_url = comp_vis_endpoint +  + version
+
+    headers_image = {
+        'Content-type': '',
+        'Ocp-Apim-Subscription-Key': comp_vis_key
+    }
+
+    with open(image_file, 'rb') as f:
+        data = f.read()
+    r = requests.post(vec_img_url, data=data, headers=headers_image)
+    image_emb = r.json()['vector']
+
+    return image_emb
+
+
+
+table_path = ''
+
+
+# Image File collector.
+
+def list_image_paths(directory):
+    image_extensions = ('.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tiff', '.webp')
+
+    image_paths = []
+
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            # Check if the file has an image extension
+            if file.lower().endswith(image_extensions):
+                 
+                image_paths.append(os.path.join(root, file))
+
+    return image_paths
+
+
+
+
+# Specify the directory containing the images
+directory = ''
+
+# Get the image paths
+image_paths = list_image_paths(directory)
+
+# Generate a DataFrame containing general product information.
+df = pd.read_excel(table_path, engine='openpyxl')
+
+
+
+# Create a loop that will iterate through the list of image paths and generate embedding to store within another list.
+im_embeddings = []
+
+for path in image_paths:
+ 
+    im_embeddings.append(image_embedding(path))
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+#---------------------------------------------------------------------------------------------------------------
+
+# COMPONENT ANALYSIS
+
+# In order for this to have any kind of use, we would need have an inkling as to what the components represent.
+# Interestingly enough, component 1 displays perfect seperation of Clarks and Skechers shoes.
+# This may indicate that component 1 is 'Clarks or Skechers'
+
+
+
+
+
+# Text embedding generator function (the tool can also interpret text).
+
+
+def text_embedding(promptxt):
+
+    version = ''
+    vec_txt_url = comp_vis_endpoint + "" + version
+
+    headers_prompt = {        
+        'Content-type': '',
+        'Ocp-Apim-Subscription-Key': comp_vis_key
+    }
+
+    prompt = {'text': promptxt}
+
+    r = requests.post(vec_txt_url, data=json.dumps(prompt), headers=headers_prompt)
+
+    text_emb = r.json().get('vector')
+   
+
+
+    return text_emb
+
+# List prompts and generate respective embeddings.
+
+prompts=[
+    "red",
+   "yellow",
+   'green',
+   'black'
+        ]
+
+text_embeddings = []
+
+for p in prompts:
+    
+    text_embeddings.append(text_embedding(p))
+
+# Create a pipeline that will normalise the image data and then apply PCA.
+
+pipeline = Pipeline([
+    
+        ('scaler', StandardScaler()), 
+        ('pca', PCA(n_components=3)) 
+    
+            ])
+
+
+results = np.vstack([pipeline.fit_transform(text_embeddings), pipeline.fit_transform(im_embeddings)])
+
+#kmeans = KMeans(n_clusters=6, random_state=42)
+#kmeans.fit(results)
+
+
+# Get the cluster labels
+#cluster_labels = kmeans.labels_
+
+# Extract coordinates for each image based on PCs.
+coordinates = results
+
+# Plot the data
+fig = plt.figure(figsize=(10, 7))
+ax = fig.add_subplot(111, projection='3d')
+
+# Scatter plot with similarities as coordinates, colored by cluster label
+#scatter = ax.scatter(coordinates[:, 0], coordinates[:, 1], coordinates[:, 2], c=cluster_labels, cmap='viridis', marker='o')
+scatter = ax.scatter(coordinates[:, 0], coordinates[:, 1], coordinates[:, 2], cmap='viridis', marker='o')
+
+# Add legend
+
+legend1 = ax.legend(*scatter.legend_elements(), title="Clusters")
+ax.add_artist(legend1)
+
+# Annotate each point with its index, identifying if it's an image or text embedding
+for i, coord in enumerate(results):
+    if i < len(text_embeddings):
+        ax.text(coord[0], coord[1], coord[2], f'Text {i+1}')
+    else:
+        ax.text(coord[0], coord[1], coord[2], f'Image {i+1 - len(text_embeddings)}')
+
+
+
+# Label each axis with the similarity to each image
+ax.set_xlabel('Component 1')
+ax.set_ylabel('Component 2')
+ax.set_zlabel('Component 3')
+ax.set_title('Principle Component Analysis Clustering')
+
+# Show plot
+plt.show()
