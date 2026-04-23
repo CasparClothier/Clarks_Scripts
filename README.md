@@ -1,7 +1,7 @@
 # Clarks_Scripts
 
 Here is some of the work I completed during my time as an interning data scientist at Clarks. During this time I worked with a Computer Vision developed by Stephen Nex, their head Data Scientist.
-I tried to understand its interpretation of image and text data, in order to use it in the examination of Clarks' product range in comparison with that of competitors. 
+I tried to understand its interpretation of image and text data, in order to use it in the examination of Clarks' product range in comparison with that of competitors. This was done in the interest of comparing the visual design of different shoes- a proof-of-concept around Machine Learning being used to aid design choices.
 
 This tool functions by converting image and text data into vectors.
 
@@ -15,6 +15,7 @@ Besides establishing contact with the tool, in this script I establish ways of t
 - Softness or sharpness of lines
 ...
 
-After a process of trial and error I naturally found that while this was heavily dependent on the input dataset, brand labels significantly effected the principle components of a dataset. 
-To avoid this and focus more on other design features, I photoshopped logos off the shoes. 
+After a process of trial and error I naturally found that while this was heavily dependent on the input dataset, brand labels significantly effected the principle components of a dataset. To avoid this and focus more on other design features, I photoshopped logos off the shoes.
+
+Across multiple different datasets, I found that there were significant gaps in Clarks' range when it came to large, white soles and casual trainers.
 Sadly, I haven't been able to find any of the visualisations that I produced at the time. When I do, I will be sure to upload them here.
